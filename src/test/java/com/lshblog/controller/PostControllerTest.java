@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest
@@ -31,24 +32,28 @@ class PostControllerTest {
                         .content("{\"title\": \"제목\", \"content\" : \"내용\"}")
                 )
                 .andExpect(status().isOk())
-                .andExpect(MockMvcResultMatchers.content().string("Hello World"))
+                .andExpect(MockMvcResultMatchers.content().string("{}"))
                 .andDo(MockMvcResultHandlers.print());
 
     }
 
-//    @Test
-//    @DisplayName("/posts 요청시 Hello World를 출력")
-//    void test() throws Exception {
-//        // expected
-//        mockMvc.perform(MockMvcRequestBuilders.post("/posts")
-//                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-//                        .param("title","글 제목입니다.")
-//                        .param("content","글 내용입니다. 하하"))
-//                .andExpect(status().isOk())
-//                .andExpect(MockMvcResultMatchers.content().string("Hello World"))
-//                .andDo(MockMvcResultHandlers.print());
-//
-//    }
+    @Test
+    @DisplayName("/posts 요청시title 값은 필수다")
+    void test2() throws Exception {
+        // expected
+        mockMvc.perform(MockMvcRequestBuilders.post("/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\": null, \"content\" : null}")
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("400"))
+                .andExpect(jsonPath("$.message").value("잘못된 요청입니다."))
+                .andExpect(jsonPath("$.validation.title").value("타이틀을 입력해주세요."))
+                .andExpect(jsonPath("$.validation.content").value("컨텐츠를 입력해주세요."))
+
+                .andDo(MockMvcResultHandlers.print());
+
+    }
 
 
 }
